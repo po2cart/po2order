@@ -175,6 +175,7 @@ See [`docs/erp-integration-guide.md`](./docs/erp-integration-guide.md) for step-
 - **[API Reference](./docs/api-reference.md)** — REST API endpoints
 - **[ERP Integration Guide](./docs/erp-integration-guide.md)** — How to build a new ERP adapter
 - **[Deployment Guide](./docs/deployment.md)** — Production deployment instructions
+- **[Infrastructure Setup](./docs/infra.md)** — AWS/Cloudflare provisioning + env vars
 - **[AGENTS.md](./AGENTS.md)** — For AI agents working on this project
 
 ---
