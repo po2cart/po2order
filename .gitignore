@@ -56,3 +56,9 @@ logs/
 *.db-journal
 *.sqlite
 *.sqlite3
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/*.tfstate
+**/*.tfstate.*

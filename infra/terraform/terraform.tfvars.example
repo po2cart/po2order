@@ -1,0 +1,17 @@
+project_name          = "po2order"
+environment           = "dev"
+
+# Toggle providers
+enable_aws        = true
+enable_cloudflare = true
+
+# AWS
+aws_region          = "us-east-1"
+aws_s3_bucket_name  = "po2order-dev-documents"
+aws_sqs_queue_name  = "po2order-dev-processing"
+
+# Cloudflare
+cloudflare_account_id  = "your-cloudflare-account-id"
+cloudflare_api_token   = "your-cloudflare-api-token"
+r2_bucket_name         = "po2order-dev-documents"
+cloudflare_queue_name  = "po2order-dev-processing"
