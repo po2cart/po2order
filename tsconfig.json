@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@po2order/core": ["./packages/core/src"],
+      "@po2order/db": ["./packages/db/src"],
+      "@po2order/extraction": ["./packages/extraction/src"],
+      "@po2order/matching": ["./packages/matching/src"],
+      "@po2order/erp-adapters/*": ["./packages/erp-adapters/*/src"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", ".next"]
+}

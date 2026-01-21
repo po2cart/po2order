@@ -1,0 +1,274 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// Workspace (Multi-tenancy)
+// ============================================================================
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users           User[]
+  purchaseOrders  PurchaseOrder[]
+  products        Product[]
+  customers       Customer[]
+  salesOrders     SalesOrder[]
+  erpConfig       ERPConfig?
+
+  @@map("workspaces")
+}
+
+// ============================================================================
+// User
+// ============================================================================
+
+model User {
+  id          String   @id @default(cuid())
+  workspaceId String
+  clerkUserId String   @unique
+  email       String
+  name        String?
+  role        String   @default("user") // "admin", "manager", "user"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+// ============================================================================
+// Purchase Order (Extracted from PDF/Email)
+// ============================================================================
+
+model PurchaseOrder {
+  id          String   @id @default(cuid())
+  workspaceId String
+  status      String   @default("processing") // "processing", "review", "approved", "pushed", "error", "rejected"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Source
+  sourceType       String // "email", "upload", "api"
+  sourceEmail      String?
+  sourceAttachment String? // S3/R2 key
+  rawContent       String? // Raw email body or file content
+
+  // Extracted header data
+  orderNumber          String?
+  orderDate            DateTime?
+  expectedDeliveryDate DateTime?
+
+  // Customer
+  customerCode String?
+  customerId   String?
+  customer     Customer? @relation(fields: [customerId], references: [id])
+
+  // Delivery
+  deliveryAddressLine1 String?
+  deliveryAddressLine2 String?
+  deliveryCity         String?
+  deliveryState        String?
+  deliveryPostalCode   String?
+  deliveryCountry      String?
+  deliveryCode         String?
+
+  // Totals
+  subtotal Decimal?
+  tax      Decimal?
+  total    Decimal?
+
+  // Metadata
+  notes               String?
+  specialInstructions String?
+  errorDetails        String?
+
+  // Relations
+  workspace Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lines     PurchaseOrderLine[]
+  salesOrder SalesOrder?
+
+  @@index([workspaceId, status])
+  @@index([customerId])
+  @@map("purchase_orders")
+}
+
+// ============================================================================
+// Purchase Order Line
+// ============================================================================
+
+model PurchaseOrderLine {
+  id              String @id @default(cuid())
+  purchaseOrderId String
+  lineNumber      Int
+
+  // Product
+  productCode           String?
+  productId             String?
+  product               Product? @relation(fields: [productId], references: [id])
+  description           String?
+  productCodeConfidence Decimal? // 0-1
+
+  // Quantity & Price
+  quantity           Decimal
+  quantityConfidence Decimal? // 0-1
+  unit               String?
+  unitPrice          Decimal?
+  totalPrice         Decimal?
+
+  // Metadata
+  notes String?
+
+  // Relations
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseOrderId])
+  @@index([productId])
+  @@map("purchase_order_lines")
+}
+
+// ============================================================================
+// Product Catalog
+// ============================================================================
+
+model Product {
+  id          String   @id @default(cuid())
+  workspaceId String
+  code        String
+  description String
+  barcode     String?
+  unit        String?
+  price       Decimal?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ERP sync metadata
+  erpId           String?
+  erpLastSyncedAt DateTime?
+
+  // Relations
+  workspace         Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  purchaseOrderLines PurchaseOrderLine[]
+
+  @@unique([workspaceId, code])
+  @@index([workspaceId, code])
+  @@index([barcode])
+  @@map("products")
+}
+
+// ============================================================================
+// Customer
+// ============================================================================
+
+model Customer {
+  id          String   @id @default(cuid())
+  workspaceId String
+  code        String
+  name        String
+  email       String?
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ERP sync metadata
+  erpId           String?
+  erpLastSyncedAt DateTime?
+
+  // Relations
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  deliveryAddresses CustomerAddress[]
+  purchaseOrders   PurchaseOrder[]
+
+  @@unique([workspaceId, code])
+  @@index([workspaceId])
+  @@map("customers")
+}
+
+// ============================================================================
+// Customer Delivery Address
+// ============================================================================
+
+model CustomerAddress {
+  id         String   @id @default(cuid())
+  customerId String
+  code       String
+  name       String?
+  line1      String
+  line2      String?
+  city       String
+  state      String?
+  postalCode String
+  country    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@map("customer_addresses")
+}
+
+// ============================================================================
+// Sales Order (Created in ERP)
+// ============================================================================
+
+model SalesOrder {
+  id              String   @id @default(cuid())
+  workspaceId     String
+  purchaseOrderId String   @unique
+  erpOrderId      String   // ERP's order ID/number
+  status          String   @default("pending") // "pending", "confirmed", "shipped", "delivered", "cancelled"
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // ERP response metadata
+  erpResponse String? // JSON response from ERP
+
+  // Relations
+  workspace     Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  @@index([workspaceId])
+  @@index([erpOrderId])
+  @@map("sales_orders")
+}
+
+// ============================================================================
+// ERP Configuration
+// ============================================================================
+
+model ERPConfig {
+  id          String   @id @default(cuid())
+  workspaceId String   @unique
+  type        String   // "netsuite", "sap-b1", "pronto-xi", "d365-fo"
+  credentials String   // Encrypted JSON
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Last sync metadata
+  lastCatalogSyncAt DateTime?
+  lastOrderPushAt   DateTime?
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("erp_configs")
+}

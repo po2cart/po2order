@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "@po2order/db#generate": {
+      "cache": false
+    },
+    "@po2order/db#push": {
+      "cache": false
+    },
+    "@po2order/db#migrate": {
+      "cache": false
+    },
+    "@po2order/db#studio": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

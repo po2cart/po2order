@@ -1,0 +1,49 @@
+{
+  "name": "po2order",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered B2B purchase order automation platform",
+  "keywords": [
+    "purchase-order",
+    "automation",
+    "erp-integration",
+    "ai-extraction",
+    "b2b"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/po2cart/po2order"
+  },
+  "license": "MIT",
+  "author": "POtoOrder Team",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "packages/erp-adapters/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:generate": "pnpm --filter @po2order/db generate",
+    "db:push": "pnpm --filter @po2order/db push",
+    "db:migrate": "pnpm --filter @po2order/db migrate",
+    "db:studio": "pnpm --filter @po2order/db studio"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "prettier": "^3.4.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
