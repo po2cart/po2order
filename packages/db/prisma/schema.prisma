@@ -28,6 +28,7 @@ model Workspace {
   customers       Customer[]
   salesOrders     SalesOrder[]
   erpConfig       ERPConfig?
+  quickBooksConnection QuickBooksConnection?
 
   @@map("workspaces")
 }
@@ -271,4 +272,37 @@ model ERPConfig {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@map("erp_configs")
+}
+
+// ============================================================================
+// QuickBooks OAuth Connection
+// ============================================================================
+
+model QuickBooksConnection {
+  id          String   @id @default(cuid())
+  workspaceId String   @unique
+  realmId     String?
+
+  // OAuth state tracking
+  state         String?
+  stateExpiresAt DateTime?
+
+  // Encrypted tokens
+  accessTokenEnc  String?
+  refreshTokenEnc String?
+
+  // Token metadata
+  tokenType              String?
+  scope                  String?
+  expiresAt              DateTime?
+  refreshTokenExpiresAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("quickbooks_connections")
 }

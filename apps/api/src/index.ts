@@ -4,8 +4,9 @@
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { quickBooksRouter } from "./quickbooks";
 
-const app = new Hono();
+export const app = new Hono();
 
 // Middleware
 app.use("/*", cors());
@@ -16,6 +17,8 @@ app.get("/health", (c) => {
 });
 
 // API routes
+app.route("/api/quickbooks", quickBooksRouter);
+
 app.get("/api/purchase-orders", async (c) => {
   // TODO: Implement
   return c.json({ message: "Not implemented" }, 501);
