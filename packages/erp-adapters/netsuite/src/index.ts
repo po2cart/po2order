@@ -1,12 +1,20 @@
 /**
  * NetSuite ERP Adapter
- * 
+ *
  * TODO: Implement NetSuite SuiteTalk integration
  * https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1540391670.html
  */
 
 import { ERPAdapter } from "@po2order/erp-adapters-base";
-import { ExtractedPurchaseOrder, Product, Customer, SalesOrderStatus } from "@po2order/core";
+import {
+  ExtractedPurchaseOrder,
+  Product,
+  Customer,
+  SalesOrderStatus,
+  DeliveryAddress,
+  DuplicateCheckResult,
+  CustomFieldMapping,
+} from "@po2order/core";
 
 export class NetSuiteAdapter implements ERPAdapter {
   async connect(config: Record<string, any>): Promise<void> {
@@ -28,7 +36,17 @@ export class NetSuiteAdapter implements ERPAdapter {
     throw new Error("NetSuiteAdapter.syncCustomers() not implemented");
   }
 
-  async createSalesOrder(po: ExtractedPurchaseOrder): Promise<string> {
+  async syncDeliveryAddresses(customerCode?: string): Promise<DeliveryAddress[]> {
+    // TODO: Fetch delivery addresses from NetSuite
+    throw new Error("NetSuiteAdapter.syncDeliveryAddresses() not implemented");
+  }
+
+  async checkDuplicateOrder(po: ExtractedPurchaseOrder): Promise<DuplicateCheckResult> {
+    // TODO: Check for duplicate orders in NetSuite
+    throw new Error("NetSuiteAdapter.checkDuplicateOrder() not implemented");
+  }
+
+  async createSalesOrder(po: ExtractedPurchaseOrder, customFields?: CustomFieldMapping[]): Promise<string> {
     // TODO: Map PO to NetSuite Sales Order format and POST
     throw new Error("NetSuiteAdapter.createSalesOrder() not implemented");
   }

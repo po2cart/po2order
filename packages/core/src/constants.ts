@@ -22,6 +22,7 @@ export const QUEUES = {
 
 // Supported ERP types
 export const ERP_TYPES = {
+  ACCREDO: "accredo",
   NETSUITE: "netsuite",
   SAP_B1: "sap-b1",
   PRONTO_XI: "pronto-xi",

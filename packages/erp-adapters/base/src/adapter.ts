@@ -1,10 +1,18 @@
 /**
  * Abstract ERP Adapter Interface
- * 
+ *
  * All ERP adapters must implement this interface
  */
 
-import { ExtractedPurchaseOrder, Product, Customer, SalesOrderStatus } from "@po2order/core";
+import {
+  ExtractedPurchaseOrder,
+  Product,
+  Customer,
+  SalesOrderStatus,
+  DeliveryAddress,
+  DuplicateCheckResult,
+  CustomFieldMapping,
+} from "@po2order/core";
 
 export interface ERPAdapter {
   /**
@@ -28,10 +36,20 @@ export interface ERPAdapter {
   syncCustomers(): Promise<Customer[]>;
 
   /**
+   * Sync delivery addresses from ERP for a given customer (or all)
+   */
+  syncDeliveryAddresses(customerCode?: string): Promise<DeliveryAddress[]>;
+
+  /**
+   * Check if a purchase order would create a duplicate sales order in the ERP
+   */
+  checkDuplicateOrder(po: ExtractedPurchaseOrder): Promise<DuplicateCheckResult>;
+
+  /**
    * Create Sales Order in ERP from Purchase Order
    * Returns ERP order ID/number
    */
-  createSalesOrder(po: ExtractedPurchaseOrder): Promise<string>;
+  createSalesOrder(po: ExtractedPurchaseOrder, customFields?: CustomFieldMapping[]): Promise<string>;
 
   /**
    * Get Sales Order status from ERP

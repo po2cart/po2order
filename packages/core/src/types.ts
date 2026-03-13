@@ -142,3 +142,48 @@ export const SalesOrderStatusSchema = z.enum([
 ]);
 
 export type SalesOrderStatus = z.infer<typeof SalesOrderStatusSchema>;
+
+// ============================================================================
+// Delivery Address Types
+// ============================================================================
+
+export const DeliveryAddressSchema = z.object({
+  code: z.string(),
+  name: z.string().optional(),
+  line1: z.string(),
+  line2: z.string().optional(),
+  city: z.string(),
+  state: z.string().optional(),
+  postalCode: z.string(),
+  country: z.string().optional(),
+  customerId: z.string().optional(),
+});
+
+export type DeliveryAddress = z.infer<typeof DeliveryAddressSchema>;
+
+// ============================================================================
+// Custom Field Mapping Types
+// ============================================================================
+
+export const CustomFieldMappingSchema = z.object({
+  erpFieldName: z.string(),
+  localFieldName: z.string(),
+  fieldType: z.enum(["string", "number", "boolean", "date"]),
+  defaultValue: z.any().optional(),
+  transform: z.enum(["none", "uppercase", "lowercase", "trim"]).default("none"),
+});
+
+export type CustomFieldMapping = z.infer<typeof CustomFieldMappingSchema>;
+
+// ============================================================================
+// Duplicate Check Types
+// ============================================================================
+
+export const DuplicateCheckResultSchema = z.object({
+  isDuplicate: z.boolean(),
+  existingOrderId: z.string().optional(),
+  existingOrderNumber: z.string().optional(),
+  matchReason: z.string().optional(),
+});
+
+export type DuplicateCheckResult = z.infer<typeof DuplicateCheckResultSchema>;

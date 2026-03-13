@@ -15,6 +15,7 @@
     "@po2order/extraction": "workspace:*",
     "@po2order/matching": "workspace:*",
     "@po2order/erp-adapters-base": "workspace:*",
+    "@po2order/erp-adapters-accredo": "workspace:*",
     "bullmq": "^5.32.3"
   },
   "devDependencies": {
