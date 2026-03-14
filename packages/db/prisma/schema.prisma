@@ -59,7 +59,7 @@ model User {
 model PurchaseOrder {
   id          String   @id @default(cuid())
   workspaceId String
-  status      String   @default("processing") // "processing", "review", "approved", "pushed", "error", "rejected"
+  status      String   @default("processing") // "processing", "review", "approved", "pushed", "error", "held", "rejected"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

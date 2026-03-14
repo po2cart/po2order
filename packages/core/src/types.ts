@@ -14,6 +14,7 @@ export const PurchaseOrderStatusSchema = z.enum([
   "approved",      // Approved, ready for ERP
   "pushed",        // Pushed to ERP
   "error",         // Extraction or ERP error
+  "held",
   "rejected",      // Manually rejected
 ]);
 

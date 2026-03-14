@@ -4,5 +4,5 @@
  * Abstract base interface for ERP adapters
  */
 
-export { ERPAdapter } from "./adapter";
+export type { ERPAdapter } from "./adapter";
 export * from "./types";
