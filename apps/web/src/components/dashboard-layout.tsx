@@ -52,7 +52,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </nav>
           <div className="border-t p-4">
             <div className="flex items-center gap-3 px-3">
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
               <div className="flex flex-col">
                 <span className="text-sm font-medium">Gemini User</span>
                 <span className="text-xs text-muted-foreground">Free Plan</span>
@@ -70,7 +70,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <span>PO2Order</span>
           </Link>
           <div className="ml-auto">
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </div>
         </header>
         <main className="flex-1 overflow-auto p-6">

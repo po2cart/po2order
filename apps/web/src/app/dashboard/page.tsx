@@ -2,22 +2,26 @@
 
 import React from "react"
 import Link from "next/link"
+import useSWR from "swr"
+import { api } from "@/lib/api"
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { FileText, Clock, CheckCircle, AlertCircle, Search } from "lucide-react"
-
-const MOCK_POS = [
-  { id: "po-1", customer: "Crisp NZ", orderNo: "PO-12345", date: "2026-03-12", status: "review", items: 12, total: 1540.50 },
-  { id: "po-2", customer: "Southland Food", orderNo: "PO-67890", date: "2026-03-13", status: "review", items: 5, total: 450.00 },
-  { id: "po-3", customer: "Otago Wholesalers", orderNo: "OW-2233", date: "2026-03-14", status: "held", items: 25, total: 3200.75 },
-  { id: "po-4", customer: "Crisp NZ", orderNo: "PO-12346", date: "2026-03-10", status: "pushed", items: 8, total: 890.20 },
-]
+import { FileText, Clock, CheckCircle, AlertCircle, Search, Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
+  const { data, error, isLoading } = useSWR("/api/purchase-orders", () => api.purchaseOrders.list())
+  const pos = data?.data || []
+
+  const stats = {
+    pending: pos.filter((p: any) => p.status === 'review' || p.status === 'processing').length,
+    held: pos.filter((p: any) => p.status === 'held').length,
+    completed: pos.filter((p: any) => p.status === 'approved' || p.status === 'pushed').length,
+  }
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
@@ -37,8 +41,8 @@ export default function DashboardPage() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">+2 from yesterday</p>
+              <div className="text-2xl font-bold">{stats.pending}</div>
+              <p className="text-xs text-muted-foreground">Needs attention</p>
             </CardContent>
           </Card>
           <Card>
@@ -47,7 +51,7 @@ export default function DashboardPage() {
               <AlertCircle className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">3</div>
+              <div className="text-2xl font-bold">{stats.held}</div>
               <p className="text-xs text-muted-foreground">Action required</p>
             </CardContent>
           </Card>
@@ -57,8 +61,8 @@ export default function DashboardPage() {
               <CheckCircle className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">145</div>
-              <p className="text-xs text-muted-foreground">Last 30 days</p>
+              <div className="text-2xl font-bold">{stats.completed}</div>
+              <p className="text-xs text-muted-foreground">Successfully processed</p>
             </CardContent>
           </Card>
           <Card>
@@ -90,31 +94,46 @@ export default function DashboardPage() {
               />
             </div>
           </div>
-          <TabsContent value="pending" className="mt-4">
-            <POTable pos={MOCK_POS.filter(p => p.status === "review")} />
-          </TabsContent>
-          <TabsContent value="held" className="mt-4">
-            <POTable pos={MOCK_POS.filter(p => p.status === "held")} />
-          </TabsContent>
-          <TabsContent value="completed" className="mt-4">
-            <POTable pos={MOCK_POS.filter(p => p.status === "pushed")} />
-          </TabsContent>
+          
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <>
+              <TabsContent value="pending" className="mt-4">
+                <POTable pos={pos.filter((p: any) => p.status === "review" || p.status === "processing")} />
+              </TabsContent>
+              <TabsContent value="held" className="mt-4">
+                <POTable pos={pos.filter((p: any) => p.status === "held")} />
+              </TabsContent>
+              <TabsContent value="completed" className="mt-4">
+                <POTable pos={pos.filter((p: any) => p.status === "approved" || p.status === "pushed")} />
+              </TabsContent>
+            </>
+          )}
         </Tabs>
       </div>
     </DashboardLayout>
   )
 }
 
-function POTable({ pos }: { pos: typeof MOCK_POS }) {
+function POTable({ pos }: { pos: any[] }) {
+  if (pos.length === 0) {
+    return (
+      <Card className="flex h-32 items-center justify-center text-muted-foreground italic">
+        No purchase orders found
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Customer</TableHead>
             <TableHead>Order Number</TableHead>
             <TableHead>Date</TableHead>
-            <TableHead>Items</TableHead>
             <TableHead>Total</TableHead>
             <TableHead>Status</TableHead>
             <TableHead className="text-right">Action</TableHead>
@@ -123,13 +142,15 @@ function POTable({ pos }: { pos: typeof MOCK_POS }) {
         <TableBody>
           {pos.map((po) => (
             <TableRow key={po.id}>
-              <TableCell className="font-medium">{po.customer}</TableCell>
-              <TableCell>{po.orderNo}</TableCell>
-              <TableCell>{po.date}</TableCell>
-              <TableCell>{po.items}</TableCell>
-              <TableCell>${po.total.toFixed(2)}</TableCell>
+              <TableCell className="font-medium">{po.orderNumber || 'Pending'}</TableCell>
+              <TableCell>{po.orderDate ? new Date(po.orderDate).toLocaleDateString() : 'N/A'}</TableCell>
+              <TableCell>${Number(po.total || 0).toFixed(2)}</TableCell>
               <TableCell>
-                <Badge variant={po.status === "review" ? "warning" : po.status === "held" ? "destructive" : "success"}>
+                <Badge variant={
+                  po.status === "review" ? "warning" : 
+                  po.status === "held" ? "destructive" : 
+                  po.status === "approved" || po.status === "pushed" ? "success" : "secondary"
+                }>
                   {po.status}
                 </Badge>
               </TableCell>
