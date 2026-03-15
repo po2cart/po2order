@@ -31,18 +31,17 @@ export class CustomerMatcher {
    * Match customer by phone (normalized — digits only)
    */
   matchByPhone(phone: string, customers: Customer[]): MatchResult<Customer> | null {
-    const digits = phone.replace(/\D/g, "");
+    const digits = phone.replace(/\D/g, "").replace(/^0+/, "");
     if (digits.length < 6) return null;
 
     const customer = customers.find((c) => {
       if (!c.phone) return false;
-      const cDigits = c.phone.replace(/\D/g, "");
-      // Match last N digits to handle country code differences
+      const cDigits = c.phone.replace(/\D/g, "").replace(/^0+/, "");
+      // Match last N digits to handle country code differences (e.g. +64 vs 0)
       const minLen = Math.min(digits.length, cDigits.length);
-      return (
-        minLen >= 6 &&
-        digits.slice(-minLen) === cDigits.slice(-minLen)
-      );
+      if (minLen < 6) return false;
+      
+      return digits.slice(-minLen) === cDigits.slice(-minLen);
     });
     return customer ? { item: customer, confidence: 0.85, method: "phone" } : null;
   }

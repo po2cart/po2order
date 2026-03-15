@@ -70,8 +70,8 @@ export class ProductMatcher {
       const productCode = normalizeString(product.code);
       const dist = this.levenshtein(normalized, productCode);
 
-      // Allow at most ~20% of the code length as edit distance, min 1
-      const threshold = Math.max(1, Math.floor(productCode.length * 0.2));
+      // Allow at most ~25% of the code length as edit distance, min 1
+      const threshold = Math.max(1, Math.ceil(productCode.length * 0.25));
       if (dist <= threshold && dist < bestDistance) {
         bestDistance = dist;
         bestMatch = product;
